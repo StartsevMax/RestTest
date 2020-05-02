@@ -7,34 +7,27 @@ import static org.hamcrest.core.IsEqual.equalTo;
 
 public class StatusCodeTests {
     @Test
-    public void okStatusCheck() {
+    public void getStatusAndIdCheck() {
         RestAssured
                 .get("http://localhost:8080/list/1")
                 .then()
                 .assertThat()
-                .statusCode(200);
-    }
-
-    @Test
-    public void rightElementReturned() {
-        RestAssured
-                .get("http://localhost:8080/list/1")
-                .then()
+                .statusCode(200)
                 .assertThat()
-                .body("id", equalTo(1));
+                .body("id",equalTo(1));
     }
 
     @Test
-    public void notFoundStatusCheck() {
+    public void getNotFoundStatusCheck() {
         RestAssured
-                .get("http://localhost:8080/list/10")
+                .get("http://localhost:8080/list/100")
                 .then()
                 .assertThat()
                 .statusCode(404);
     }
 
     @Test
-    public void notFoundErrorMessageCheck() {
+    public void getNotFoundErrorMessageCheck() {
         String errorMessage = RestAssured
                 .get("http://localhost:8080/list/10")
                 .getBody()
@@ -43,24 +36,34 @@ public class StatusCodeTests {
     }
 
     @Test
-    public void okStatusCheck2() {
-        RestAssured.baseURI = "https://localhost";
+    public void postStatusAndBodyCheck() {
+        RestAssured.baseURI = "http://localhost";
         RestAssured.port = 8080;
-        String description = "write some shit";
+        String description = "something";
         String requestBody = "{\n\"description\":\"" + description + "\"}";
-        Response response = null;
-        try {
-            RestAssured
-                    .given()
-                    .contentType(ContentType.JSON)
-                    .body(requestBody)
-                    .when()
-                    .post("/list")
-                    .then()
-                    .assertThat()
-                    .statusCode(201);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        RestAssured.given()
+                .contentType(ContentType.JSON)
+                .body(requestBody)
+                .post("/list")
+                .then()
+                .statusCode(200)
+                .extract()
+                .response()
+                .then()
+                .assertThat()
+                .body("description",equalTo(description));
+    }
+
+    @Test
+    public void deleteStatusCheck() {
+        RestAssured.baseURI = "http://localhost";
+        RestAssured.port = 8080;
+        int id = 17;
+        RestAssured
+                .given()
+                .delete("/list/" + id)
+                .then()
+                .assertThat()
+                .statusCode(200);
     }
 }
